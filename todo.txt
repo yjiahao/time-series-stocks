@@ -2,3 +2,5 @@
 2. do deep learning: rnn, lstm, gru, cnn
 3. machine learning: gradient boosted regressors
 4. app if this shit works (api if it doesn't work, express.js) (or predict whether the stock price next day will be up or down, research more on this)
+
+1. research on how to split time series data (leave one out cross validation)
