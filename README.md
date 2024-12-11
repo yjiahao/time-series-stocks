@@ -56,7 +56,7 @@ Root Mean Squared Error (RMSE)
 | Model             | RMSE before tuning | RMSE after tuning |
 | :---------------- | :------: | :------: |
 | ARIMAX            |   9.40   |     -    |
-| XGBoost Regressor |   5.44   |   4.88   |
+| XGBoost Regressor |   5.44   |   4.84   |
 
 The XGBoost model outperformed ARIMAX in RMSE.
 
