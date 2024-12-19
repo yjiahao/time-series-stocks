@@ -1,7 +1,11 @@
+from typing import Tuple
+
 import pandas as pd
 import numpy as np
 
 from sklearn.preprocessing import StandardScaler
+
+from statsmodels.tsa.arima.model import ARIMAResultsWrapper
 
 def preprocess_arima_data(df: pd.DataFrame) -> pd.DataFrame:
     '''
@@ -27,3 +31,36 @@ def preprocess_arima_data(df: pd.DataFrame) -> pd.DataFrame:
     df1 = df[cols_to_keep]
 
     return df1
+
+def arimax_predict(
+    arimax_model: ARIMAResultsWrapper, 
+    df_arima: pd.DataFrame, 
+    days: int
+) -> Tuple[pd.Series, pd.DataFrame]:
+    '''
+    Function to make predictions with the arimax model.
+
+    Args:
+        arimax_model: fitted arimax model that we will load from models folder
+        df_arima: preprocessed dataframe for arimax
+        days: number of days to predict, starting from the last timestamp arimax was trained on
+
+    Returns:
+        Tuple of predicted_prices, conf_int
+    '''
+
+    # forecasting stuff, according to number of days we want (NOTE: must start at index -20, as it is the last timestamp ARIMAX model was trained on)
+    exog_slice_end = -(20 - days) if days < 20 else None
+    forecast = arimax_model.get_prediction(start = df_arima.index[-20], end = df_arima.index[-(20 - days + 1)], exog = df_arima[["Open", "Volume", "MA", "M_STD"]][-20:exog_slice_end])
+    mean_forecast = forecast.predicted_mean
+    confidence_intervals = forecast.conf_int()
+
+    # raise it to the exponential power, since ARIMAX predicts log closing prices
+    predicted_prices = np.exp(mean_forecast)
+    conf_int = np.exp(confidence_intervals)
+
+    # rename the keys in the dictionary
+    conf_int["lower_close"] = conf_int.pop("lower log_close")
+    conf_int["upper_close"] = conf_int.pop("upper log_close")
+
+    return (predicted_prices, conf_int)
